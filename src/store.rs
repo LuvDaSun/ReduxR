@@ -1,9 +1,10 @@
+use super::middleware::*;
 use super::reduce::*;
 use std::marker::PhantomData;
 
 pub struct Store<State, Action> {
     state: State,
-    middleware: Vec<Box<dyn Fn(&Action) -> ()>>,
+    middleware: Vec<Box<dyn Fn(MiddlewareContext<State, Action>) -> ()>>,
     action: PhantomData<Action>,
 }
 
@@ -23,7 +24,7 @@ where
 
     pub fn add_middleware<Middleware>(mut self, middleware: Middleware) -> Self
     where
-        Middleware: 'static + Fn(&Action) -> (),
+        Middleware: 'static + Fn(MiddlewareContext<State, Action>) -> (),
     {
         self.middleware.push(Box::new(middleware));
         self
@@ -39,7 +40,9 @@ where
         match middleware {
             Option::None => self.state = self.state.reduce(action),
             Option::Some(middleware) => {
-                middleware(action);
+                let get_state = Box::new(|| self.get_state());
+                let context = MiddlewareContext { action, get_state };
+                middleware(context);
                 self.dispatch_index(action, index + 1);
             }
         };
@@ -99,7 +102,10 @@ mod tests {
     #[test]
     fn store_middleware_test() {
         let mut store: Store<LampState, LampAction> = Store::default()
-            .add_middleware(|_| {})
+            .add_middleware(|context: MiddlewareContext<LampState, LampAction>| {
+                let state = (context.get_state)();
+                println!("{}", state.power);
+            })
             .add_middleware(|_| {});
 
         let state = store.get_state();
