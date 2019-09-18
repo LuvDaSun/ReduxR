@@ -34,16 +34,18 @@ where
         self.dispatch_index(action, 0);
     }
 
-    fn dispatch_index(&mut self, action: &Action, index: usize) {
+    pub fn dispatch_index(&mut self, action: &Action, index: usize) {
         let middleware = self.middleware.get(index);
 
         match middleware {
             Option::None => self.state = self.state.reduce(action),
             Option::Some(middleware) => {
-                let get_state = Box::new(|| self.get_state());
-                let context = MiddlewareContext { action, get_state };
+                let context = MiddlewareContext {
+                    index,
+                    action,
+                    store: self,
+                };
                 middleware(context);
-                self.dispatch_index(action, index + 1);
             }
         };
     }
@@ -101,12 +103,13 @@ mod tests {
 
     #[test]
     fn store_middleware_test() {
-        let mut store: Store<LampState, LampAction> = Store::default()
-            .add_middleware(|context: MiddlewareContext<LampState, LampAction>| {
-                let state = (context.get_state)();
+        let mut store: Store<LampState, LampAction> = Store::default().add_middleware(
+            |mut context: MiddlewareContext<LampState, LampAction>| {
+                context.dispatch_next(context.action);
+                let state = context.get_state();
                 println!("{}", state.power);
-            })
-            .add_middleware(|_| {});
+            },
+        );
 
         let state = store.get_state();
         assert_eq!(state.power, false);
