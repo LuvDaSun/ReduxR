@@ -33,11 +33,7 @@ where
         match middleware {
             Option::None => self.state = self.state.reduce(action),
             Option::Some(middleware) => {
-                let context = MiddlewareContext {
-                    index,
-                    action,
-                    store: self,
-                };
+                let context = MiddlewareContext::new(self, action, index);
                 // middleware(context);
             }
         };

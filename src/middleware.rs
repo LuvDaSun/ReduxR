@@ -11,6 +11,14 @@ impl<'a, State, Action> MiddlewareContext<'a, State, Action>
 where
     State: Clone + Reduce<Action>,
 {
+    pub fn new(store: &'a mut Store<State, Action>, action: &'a Action, index: usize) -> Self {
+        Self {
+            store,
+            action,
+            index,
+        }
+    }
+
     pub fn get_state(&self) -> State {
         self.store.get_state()
     }
