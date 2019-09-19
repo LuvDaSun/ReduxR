@@ -3,7 +3,7 @@ use super::reduce::*;
 
 pub struct Store<State, Action> {
     state: State,
-    middleware: Vec<Box<dyn Fn(MiddlewareContext<State, Action>) -> ()>>,
+    middleware: Vec<Middleware<State, Action>>,
 }
 
 impl<State, Action> Store<State, Action>

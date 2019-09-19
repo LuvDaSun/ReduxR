@@ -1,6 +1,8 @@
 use super::reduce::*;
 use super::store::*;
 
+pub type Middleware<State, Action> = Box<dyn Fn(MiddlewareContext<State, Action>) -> ()>;
+
 pub struct MiddlewareContext<'a, State, Action> {
     pub index: usize,
     pub action: &'a Action,
