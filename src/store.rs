@@ -1,8 +1,9 @@
 use super::middleware::*;
 use super::reduce::*;
+use std::cell::RefCell;
 
 pub struct Store<State, Action> {
-    state: State,
+    state: RefCell<State>,
     middleware: Vec<Middleware<State, Action>>,
 }
 
@@ -12,7 +13,10 @@ where
 {
     pub fn new(state: State) -> Self {
         let middleware = Vec::default();
-        Self { state, middleware }
+        Self {
+            state: RefCell::new(state),
+            middleware,
+        }
     }
 
     pub fn add_middleware<Middleware>(mut self, middleware: Middleware) -> Self
@@ -23,24 +27,28 @@ where
         self
     }
 
-    pub fn dispatch(&mut self, action: &Action) {
+    pub fn dispatch(&self, action: &Action) {
         self.dispatch_index(action, 0);
     }
 
-    pub fn dispatch_index(&mut self, action: &Action, index: usize) {
+    pub fn dispatch_index(&self, action: &Action, index: usize) {
         let middleware = self.middleware.get(index);
 
         match middleware {
-            Option::None => self.state = self.state.reduce(action),
+            Option::None => {
+                let state = self.get_state();
+                let state = state.reduce(action);
+                self.state.replace(state);
+            }
             Option::Some(middleware) => {
                 let context = MiddlewareContext::new(self, action, index);
-                // middleware(context);
+                middleware(context);
             }
         };
     }
 
     pub fn get_state(&self) -> State {
-        self.state.clone()
+        self.state.borrow().clone()
     }
 }
 
@@ -76,7 +84,7 @@ mod tests {
 
     #[test]
     fn store_test() {
-        let mut store: Store<LampState, LampAction> = Store::default();
+        let store: Store<LampState, LampAction> = Store::default();
 
         let state = store.get_state();
         assert_eq!(state.power, false);
@@ -92,13 +100,12 @@ mod tests {
 
     #[test]
     fn store_middleware_test() {
-        let mut store: Store<LampState, LampAction> = Store::default().add_middleware(
-            |mut context: MiddlewareContext<LampState, LampAction>| {
+        let store: Store<LampState, LampAction> =
+            Store::default().add_middleware(|context: MiddlewareContext<LampState, LampAction>| {
                 context.dispatch_next(context.action);
                 let state = context.get_state();
                 println!("{}", state.power);
-            },
-        );
+            });
 
         let state = store.get_state();
         assert_eq!(state.power, false);
