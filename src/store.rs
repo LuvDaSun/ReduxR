@@ -1,11 +1,9 @@
 use super::middleware::*;
 use super::reduce::*;
-use std::marker::PhantomData;
 
 pub struct Store<State, Action> {
     state: State,
     middleware: Vec<Box<dyn Fn(MiddlewareContext<State, Action>) -> ()>>,
-    action: PhantomData<Action>,
 }
 
 impl<State, Action> Store<State, Action>
@@ -13,13 +11,8 @@ where
     State: Clone + Reduce<Action>,
 {
     pub fn new(state: State) -> Self {
-        let action = PhantomData;
         let middleware = Vec::default();
-        Self {
-            state,
-            middleware,
-            action,
-        }
+        Self { state, middleware }
     }
 
     pub fn add_middleware<Middleware>(mut self, middleware: Middleware) -> Self
@@ -45,7 +38,7 @@ where
                     action,
                     store: self,
                 };
-                middleware(context);
+                // middleware(context);
             }
         };
     }
