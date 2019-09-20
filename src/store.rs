@@ -75,7 +75,7 @@ mod tests {
     }
 
     impl Reduce<LampAction> for LampState {
-        fn reduce(&self, action: &LampAction) -> Self {
+        fn reduce(self, action: &LampAction) -> Self {
             match action {
                 LampAction::Switch => LampState { power: !self.power },
             }

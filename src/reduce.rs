@@ -1,5 +1,5 @@
 pub trait Reduce<Action> {
-    fn reduce(&self, action: &Action) -> Self;
+    fn reduce(self, action: &Action) -> Self;
 }
 
 #[cfg(test)]
@@ -16,7 +16,7 @@ mod tests {
     }
 
     impl Reduce<LampOnOffAction> for LampState {
-        fn reduce(&self, action: &LampOnOffAction) -> Self {
+        fn reduce(self, action: &LampOnOffAction) -> Self {
             match action {
                 LampOnOffAction::TurnOn => LampState { power: true },
                 LampOnOffAction::TurnOff => LampState { power: false },
@@ -29,7 +29,7 @@ mod tests {
     }
 
     impl Reduce<LampSwitchAction> for LampState {
-        fn reduce(&self, action: &LampSwitchAction) -> Self {
+        fn reduce(self, action: &LampSwitchAction) -> Self {
             match action {
                 LampSwitchAction::Switch => LampState { power: !self.power },
             }
