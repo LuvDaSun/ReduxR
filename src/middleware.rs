@@ -1,19 +1,24 @@
 use super::reduce::*;
 use super::store::*;
 
-pub type Middleware<State, Action> = Box<dyn Fn(MiddlewareContext<State, Action>) -> ()>;
+pub type Middleware<State, Action, DispatchResult> =
+    Box<dyn Fn(MiddlewareContext<State, Action, DispatchResult>) -> DispatchResult>;
 
-pub struct MiddlewareContext<'a, State, Action> {
+pub struct MiddlewareContext<'a, State, Action, DispatchResult> {
     pub index: usize,
     pub action: &'a Action,
-    pub store: &'a Store<State, Action>,
+    pub store: &'a Store<State, Action, DispatchResult>,
 }
 
-impl<'a, State, Action> MiddlewareContext<'a, State, Action>
+impl<'a, State, Action, DispatchResult> MiddlewareContext<'a, State, Action, DispatchResult>
 where
     State: Clone + Reduce<Action>,
 {
-    pub fn new(store: &'a Store<State, Action>, action: &'a Action, index: usize) -> Self {
+    pub fn new(
+        store: &'a Store<State, Action, DispatchResult>,
+        action: &'a Action,
+        index: usize,
+    ) -> Self {
         Self {
             store,
             action,

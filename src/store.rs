@@ -2,36 +2,39 @@ use super::middleware::*;
 use super::reduce::*;
 use std::cell::RefCell;
 
-pub struct Store<State, Action> {
+pub struct Store<State, Action, DispatchResult> {
     state: RefCell<State>,
-    middleware: Vec<Middleware<State, Action>>,
+    initial_result_factory: fn() -> DispatchResult,
+    middleware: Vec<Middleware<State, Action, DispatchResult>>,
 }
 
-impl<State, Action> Store<State, Action>
+impl<State, Action, DispatchResult> Store<State, Action, DispatchResult>
 where
     State: Clone + Reduce<Action>,
 {
-    pub fn new(state: State) -> Self {
+    pub fn new(state: State, initial_result_factory: fn() -> DispatchResult) -> Self {
         let middleware = Vec::default();
         Self {
             state: RefCell::new(state),
+            initial_result_factory,
             middleware,
         }
     }
 
     pub fn add_middleware<Middleware>(mut self, middleware: Middleware) -> Self
     where
-        Middleware: 'static + Fn(MiddlewareContext<State, Action>) -> (),
+        Middleware:
+            'static + Fn(MiddlewareContext<State, Action, DispatchResult>) -> DispatchResult,
     {
         self.middleware.push(Box::new(middleware));
         self
     }
 
-    pub fn dispatch(&self, action: &Action) {
-        self.dispatch_index(action, 0);
+    pub fn dispatch(&self, action: &Action) -> DispatchResult {
+        self.dispatch_index(action, 0)
     }
 
-    pub fn dispatch_index(&self, action: &Action, index: usize) {
+    pub fn dispatch_index(&self, action: &Action, index: usize) -> DispatchResult {
         let middleware = self.middleware.get(index);
 
         match middleware {
@@ -39,12 +42,13 @@ where
                 let state = self.get_state();
                 let state = state.reduce(action);
                 self.state.replace(state);
+                (self.initial_result_factory)()
             }
             Option::Some(middleware) => {
                 let context = MiddlewareContext::new(self, action, index);
-                middleware(context);
+                middleware(context)
             }
-        };
+        }
     }
 
     pub fn get_state(&self) -> State {
@@ -52,12 +56,13 @@ where
     }
 }
 
-impl<State, Action> Default for Store<State, Action>
+impl<State, Action, DispatchResult> Default for Store<State, Action, DispatchResult>
 where
     State: Default + Clone + Reduce<Action>,
+    DispatchResult: Default,
 {
     fn default() -> Self {
-        Store::new(State::default())
+        Store::new(State::default(), DispatchResult::default)
     }
 }
 
@@ -84,7 +89,7 @@ mod tests {
 
     #[test]
     fn store_test() {
-        let store: Store<LampState, LampAction> = Store::default();
+        let store: Store<LampState, LampAction, ()> = Store::default();
 
         let state = store.get_state();
         assert_eq!(state.power, false);
@@ -100,12 +105,13 @@ mod tests {
 
     #[test]
     fn store_middleware_test() {
-        let store: Store<LampState, LampAction> =
-            Store::default().add_middleware(|context: MiddlewareContext<LampState, LampAction>| {
+        let store: Store<LampState, LampAction, ()> = Store::default().add_middleware(
+            |context: MiddlewareContext<LampState, LampAction, ()>| {
                 context.dispatch_next(context.action);
                 let state = context.get_state();
                 println!("{}", state.power);
-            });
+            },
+        );
 
         let state = store.get_state();
         assert_eq!(state.power, false);
