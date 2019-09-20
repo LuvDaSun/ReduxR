@@ -1,5 +1,4 @@
-use super::middleware::*;
-use super::reduce::*;
+use crate::*;
 use std::cell::RefCell;
 
 pub struct Store<State, Action, DispatchResult> {

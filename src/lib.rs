@@ -1,3 +1,7 @@
-pub mod middleware;
-pub mod reduce;
-pub mod store;
+mod middleware;
+mod reduce;
+mod store;
+
+pub use middleware::*;
+pub use reduce::*;
+pub use store::*;

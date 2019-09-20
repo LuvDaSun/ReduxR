@@ -1,5 +1,4 @@
-use super::reduce::*;
-use super::store::*;
+use crate::*;
 
 pub type Middleware<State, Action, DispatchResult> =
     Box<dyn Fn(MiddlewareContext<State, Action, DispatchResult>) -> DispatchResult>;
