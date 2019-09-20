@@ -1,9 +1,9 @@
 use crate::*;
 
-pub type Middleware<State, Action, DispatchResult> =
+pub type Middleware<State, Action, DispatchResult = ()> =
     Box<dyn Fn(MiddlewareContext<State, Action, DispatchResult>) -> DispatchResult>;
 
-pub struct MiddlewareContext<'a, State, Action, DispatchResult> {
+pub struct MiddlewareContext<'a, State, Action, DispatchResult = ()> {
     pub index: usize,
     pub action: &'a Action,
     pub store: &'a Store<State, Action, DispatchResult>,

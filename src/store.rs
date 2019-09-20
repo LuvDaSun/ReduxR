@@ -1,7 +1,7 @@
 use crate::*;
 use std::cell::RefCell;
 
-pub struct Store<State, Action, DispatchResult> {
+pub struct Store<State, Action, DispatchResult = ()> {
     state: RefCell<State>,
     initial_result_factory: fn() -> DispatchResult,
     middleware: Vec<Middleware<State, Action, DispatchResult>>,
@@ -92,7 +92,7 @@ mod tests {
 
     #[test]
     fn store_test() {
-        let store: Store<LampState, LampAction, ()> = Store::default();
+        let store: Store<LampState, LampAction> = Store::default();
 
         let state = store.get_state();
         assert_eq!(state.power, false);
@@ -108,8 +108,8 @@ mod tests {
 
     #[test]
     fn store_middleware_test() {
-        let store: Store<LampState, LampAction, ()> = Store::default().add_middleware(
-            |context: MiddlewareContext<LampState, LampAction, ()>| {
+        let store: Store<LampState, LampAction> =
+            Store::default().add_middleware(|context: MiddlewareContext<LampState, LampAction>| {
                 context.dispatch_next(context.action);
 
                 if let LampAction::Switch = context.action {
@@ -120,8 +120,7 @@ mod tests {
                         context.dispatch(&LampAction::TurnOn);
                     }
                 }
-            },
-        );
+            });
 
         let state = store.get_state();
         assert_eq!(state.power, false);
