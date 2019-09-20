@@ -81,7 +81,7 @@ mod tests {
             match action {
                 LampAction::TurnOn => LampState { power: true },
                 LampAction::TurnOff => LampState { power: false },
-                _ => self.clone(),
+                _ => self,
             }
         }
     }
