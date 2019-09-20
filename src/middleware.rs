@@ -30,11 +30,11 @@ where
         self.store.get_state()
     }
 
-    pub fn dispatch(&self, action: &Action) {
-        self.store.dispatch_index(action, 0);
+    pub fn dispatch(&self, action: &Action) -> DispatchResult {
+        self.store.dispatch_index(action, 0)
     }
 
-    pub fn dispatch_next(&self, action: &Action) {
-        self.store.dispatch_index(action, self.index + 1);
+    pub fn dispatch_next(&self, action: &Action) -> DispatchResult {
+        self.store.dispatch_index(action, self.index + 1)
     }
 }

@@ -121,7 +121,8 @@ mod tests {
                         context.dispatch(&LampAction::TurnOn);
                     }
                 }
-            });
+            },
+        );
 
         let state = store.get_state();
         assert_eq!(state.power, false);
@@ -131,6 +132,28 @@ mod tests {
         assert_eq!(state.power, true);
 
         store.dispatch(&LampAction::Switch);
+        let state = store.get_state();
+        assert_eq!(state.power, false);
+    }
+
+    #[test]
+    fn store_result_test() {
+        let store: Store<LampState, LampAction, usize> = Store::default().add_middleware(
+            |context: MiddlewareContext<LampState, LampAction, usize>| {
+                let count = context.dispatch_next(context.action);
+
+                count + 1
+            },
+        );
+
+        let state = store.get_state();
+        assert_eq!(state.power, false);
+
+        store.dispatch(&LampAction::TurnOn);
+        let state = store.get_state();
+        assert_eq!(state.power, true);
+
+        store.dispatch(&LampAction::TurnOff);
         let state = store.get_state();
         assert_eq!(state.power, false);
     }
