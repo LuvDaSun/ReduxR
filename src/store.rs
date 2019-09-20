@@ -81,11 +81,11 @@ mod tests {
     }
 
     impl Reduce<LampAction> for LampState {
-        fn reduce(&self, action: &LampAction) -> Self {
+        fn reduce(self, action: &LampAction) -> Self {
             match action {
                 LampAction::TurnOn => LampState { power: true },
                 LampAction::TurnOff => LampState { power: false },
-                _ => self.clone(),
+                _ => self,
             }
         }
     }
