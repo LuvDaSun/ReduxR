@@ -66,6 +66,8 @@ mod tests {
     use super::*;
 
     enum LampAction {
+        TurnOn,
+        TurnOff,
         Switch,
     }
 
@@ -77,7 +79,9 @@ mod tests {
     impl Reduce<LampAction> for LampState {
         fn reduce(&self, action: &LampAction) -> Self {
             match action {
-                LampAction::Switch => LampState { power: !self.power },
+                LampAction::TurnOn => LampState { power: true },
+                LampAction::TurnOff => LampState { power: false },
+                _ => self.clone(),
             }
         }
     }
@@ -89,11 +93,11 @@ mod tests {
         let state = store.get_state();
         assert_eq!(state.power, false);
 
-        store.dispatch(&LampAction::Switch);
+        store.dispatch(&LampAction::TurnOn);
         let state = store.get_state();
         assert_eq!(state.power, true);
 
-        store.dispatch(&LampAction::Switch);
+        store.dispatch(&LampAction::TurnOff);
         let state = store.get_state();
         assert_eq!(state.power, false);
     }
@@ -103,8 +107,15 @@ mod tests {
         let store: Store<LampState, LampAction> =
             Store::default().add_middleware(|context: MiddlewareContext<LampState, LampAction>| {
                 context.dispatch_next(context.action);
-                let state = context.get_state();
-                println!("{}", state.power);
+
+                if let LampAction::Switch = context.action {
+                    let state = context.get_state();
+                    if state.power {
+                        context.dispatch(&LampAction::TurnOff);
+                    } else {
+                        context.dispatch(&LampAction::TurnOn);
+                    }
+                }
             });
 
         let state = store.get_state();
