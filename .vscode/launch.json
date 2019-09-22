@@ -22,6 +22,25 @@
             },
             "args": [],
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'todo'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=todo",
+                    "--package=redux-rs"
+                ],
+                "filter": {
+                    "name": "todo",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
         }
     ]
 }

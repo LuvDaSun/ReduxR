@@ -4,5 +4,6 @@
     "editor.rulers": [
         100
     ],
-    "rust.clippy_preference": "on"
+    "rust.clippy_preference": "on",
+    "rust.all_targets": true
 }
