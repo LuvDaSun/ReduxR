@@ -6,61 +6,55 @@ use reduxr::*;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct TodoItem {
     pub name: String,
     pub done: bool,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct TodoExampleState {
-    pub todos: HashMap<String, Rc<TodoItem>>,
+    pub todos: Rc<HashMap<String, Rc<TodoItem>>>,
 }
 
 impl Reduce<TodoExampleAction> for Rc<TodoExampleState> {
-    fn reduce(self, action: &TodoExampleAction) -> Self {
-        Rc::new(TodoExampleState {
-            todos: self.todos.clone().reduce(action),
-        })
+    fn reduce(mut self, action: &TodoExampleAction) -> Self {
+        let self_mut = Rc::make_mut(&mut self);
+
+        self_mut.todos = self_mut.todos.clone().reduce(action);
+
+        self
     }
 }
 
 #[allow(clippy::implicit_hasher)]
-impl Reduce<TodoExampleAction> for HashMap<String, Rc<TodoItem>> {
-    fn reduce(self, action: &TodoExampleAction) -> Self {
+impl Reduce<TodoExampleAction> for Rc<HashMap<String, Rc<TodoItem>>> {
+    fn reduce(mut self, action: &TodoExampleAction) -> Self {
         match action {
             TodoExampleAction::TodoAdd(add_item) => {
-                let mut result: Self = self.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
-                result.insert(
+                let self_mut = Rc::make_mut(&mut self);
+                self_mut.insert(
                     add_item.id.clone(),
                     Rc::new(TodoItem {
                         name: add_item.name.clone(),
                         done: false,
                     }),
                 );
-                result
             }
 
             TodoExampleAction::TodoRemove(remove_item) => {
-                let mut result: Self = self.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
-                result.remove(&remove_item.id);
-                result
+                let self_mut = Rc::make_mut(&mut self);
+                self_mut.remove(&remove_item.id);
             }
 
             TodoExampleAction::TodoResolve(resolve_item) => {
-                let mut result: Self = self.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
-                let old_item = self.get(&resolve_item.id).unwrap().clone();
+                let self_mut = Rc::make_mut(&mut self);
+                let mut_item = Rc::make_mut(self_mut.get_mut(&resolve_item.id).unwrap());
 
-                result.insert(
-                    resolve_item.id.clone(),
-                    Rc::new(TodoItem {
-                        name: old_item.name.clone(),
-                        done: true,
-                    }),
-                );
-
-                result
+                mut_item.done = true;
             }
         }
+
+        self
     }
 }
