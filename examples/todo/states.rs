@@ -1,6 +1,6 @@
 extern crate reduxr;
 
-use super::action::*;
+use super::*;
 
 use reduxr::*;
 use std::collections::HashMap;

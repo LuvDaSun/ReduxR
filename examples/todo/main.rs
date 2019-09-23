@@ -1,13 +1,13 @@
 extern crate reduxr;
 
-mod action;
-mod selector;
-mod state;
-mod store;
+mod actions;
+mod selectors;
+mod states;
+mod stores;
 
-pub use action::*;
-pub use selector::*;
-pub use state::*;
-pub use store::*;
+pub use actions::*;
+pub use selectors::*;
+pub use states::*;
+pub use stores::*;
 
 fn main() {}
