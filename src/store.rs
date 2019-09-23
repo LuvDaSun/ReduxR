@@ -55,6 +55,15 @@ where
     }
 }
 
+impl<State, Action, DispatchResult> Store<State, Action, DispatchResult>
+where
+    State: Default + Clone + Reduce<Action>,
+{
+    pub fn new_with_result(initial_result_factory: fn() -> DispatchResult) -> Self {
+        Store::new(State::default(), initial_result_factory)
+    }
+}
+
 impl<State, Action, DispatchResult> Default for Store<State, Action, DispatchResult>
 where
     State: Default + Clone + Reduce<Action>,
