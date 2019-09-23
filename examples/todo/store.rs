@@ -17,7 +17,7 @@ mod tests {
         let store = create_store();
 
         let state = store.get_state();
-        assert_eq!(state.select_todo_count(),0);
+        assert_eq!(state.select_todo_count(), 0);
 
         store.dispatch(&TodoExampleAction::TodoAdd(TodoAddPayload {
             id: String::from("a"),
@@ -25,20 +25,20 @@ mod tests {
         }));
 
         let state = store.get_state();
-        assert_eq!(state.select_todo_count(),1);
+        assert_eq!(state.select_todo_count(), 1);
 
         store.dispatch(&TodoExampleAction::TodoResolve(TodoResolvePayload {
             id: String::from("a"),
         }));
 
         let state = store.get_state();
-        assert_eq!(state.select_todo_count(),1);
+        assert_eq!(state.select_todo_count(), 1);
 
         store.dispatch(&TodoExampleAction::TodoRemove(TodoRemovePayload {
             id: String::from("a"),
         }));
 
         let state = store.get_state();
-        assert_eq!(state.select_todo_count(),0);
+        assert_eq!(state.select_todo_count(), 0);
     }
 }
