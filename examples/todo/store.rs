@@ -16,29 +16,53 @@ mod tests {
     fn test_store() {
         let store = create_store();
 
-        let state = store.get_state();
-        assert_eq!(state.select_todo_count(), 0);
+        let state1 = store.get_state();
 
         store.dispatch(&TodoExampleAction::TodoAdd(TodoAddPayload {
             id: String::from("a"),
             name: String::from("do a thing"),
         }));
 
-        let state = store.get_state();
-        assert_eq!(state.select_todo_count(), 1);
+        let state2 = store.get_state();
 
         store.dispatch(&TodoExampleAction::TodoResolve(TodoResolvePayload {
             id: String::from("a"),
         }));
 
-        let state = store.get_state();
-        assert_eq!(state.select_todo_count(), 1);
+        let state3 = store.get_state();
 
         store.dispatch(&TodoExampleAction::TodoRemove(TodoRemovePayload {
             id: String::from("a"),
         }));
 
-        let state = store.get_state();
-        assert_eq!(state.select_todo_count(), 0);
+        let state4 = store.get_state();
+
+        assert_eq!(state1.select_todo_count(), 0);
+
+        assert_eq!(state2.select_todo_count(), 1);
+        assert_eq!(
+            state2.select_todo_item(SelectTodoItemArg {
+                id: String::from("a")
+            }),
+            TodoSelectItem {
+                id: String::from("a"),
+                name: String::from("do a thing"),
+                done: false,
+            }
+        );
+
+        assert_eq!(state3.select_todo_count(), 1);
+        assert_eq!(
+            state3.select_todo_item(SelectTodoItemArg {
+                id: String::from("a")
+            }),
+            TodoSelectItem {
+                id: String::from("a"),
+                name: String::from("do a thing"),
+                done: true,
+            }
+        );
+
+        assert_eq!(state4.select_todo_count(), 0);
     }
 }

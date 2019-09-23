@@ -1,5 +1,6 @@
 use super::*;
 
+#[derive(Debug, PartialEq)]
 pub struct TodoSelectItem {
     pub id: String,
     pub name: String,
@@ -7,7 +8,7 @@ pub struct TodoSelectItem {
 }
 
 pub struct SelectTodoItemArg {
-    id: String,
+    pub id: String,
 }
 
 impl TodoExampleState {
