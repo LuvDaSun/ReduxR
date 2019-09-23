@@ -1,8 +1,8 @@
-extern crate redux_rs;
+extern crate reduxr;
 
 use super::action::*;
 
-use redux_rs::*;
+use reduxr::*;
 use std::collections::HashMap;
 use std::rc::Rc;
 

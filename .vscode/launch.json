@@ -7,16 +7,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'redux-rs'",
+            "name": "Debug unit tests in library 'reduxr'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=redux-rs"
+                    "--package=reduxr"
                 ],
                 "filter": {
-                    "name": "redux-rs",
+                    "name": "reduxr",
                     "kind": "lib"
                 }
             },
@@ -32,7 +32,7 @@
                     "test",
                     "--no-run",
                     "--example=todo",
-                    "--package=redux-rs"
+                    "--package=reduxr"
                 ],
                 "filter": {
                     "name": "todo",
