@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cargo clippy
+
 cargo test
 cargo test --example todo
 cargo test --example async
