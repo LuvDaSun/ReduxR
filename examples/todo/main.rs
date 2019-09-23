@@ -9,3 +9,5 @@ pub use action::*;
 pub use state::*;
 pub use store::*;
 pub use selector::*;
+
+fn main(){}
