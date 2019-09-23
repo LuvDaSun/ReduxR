@@ -16,13 +16,16 @@ impl TodoExampleState {
         self.todos.len()
     }
 
-    // pub fn select_todo_list(&self) -> impl Iterator{
-    //     self.todos.iter().map(|(id,item)|TodoSelectItem{
-    //         id: id.clone(),
-    //         name: item.name.clone(),
-    //         done: item.done,
-    //     }).collect()
-    // }
+    pub fn select_todo_list(&self) -> Vec<TodoSelectItem> {
+        self.todos
+            .iter()
+            .map(|(id, item)| TodoSelectItem {
+                id: id.clone(),
+                name: item.name.clone(),
+                done: item.done,
+            })
+            .collect()
+    }
 
     pub fn select_todo_item(&self, SelectTodoItemArg { id }: SelectTodoItemArg) -> TodoSelectItem {
         let item = self.todos.get(&id).unwrap();
