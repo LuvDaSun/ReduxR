@@ -18,6 +18,7 @@ jobs:
     steps:
       - checkout
       - run: cargo test --all-targets
+      - run: cargo test --doc
 
   publish:
     executor: rust
