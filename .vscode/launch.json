@@ -7,17 +7,36 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'redux-rs'",
+            "name": "Debug unit tests in library 'reduxr'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=redux-rs"
+                    "--package=reduxr"
                 ],
                 "filter": {
-                    "name": "redux-rs",
+                    "name": "reduxr",
                     "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'todo'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=todo",
+                    "--package=reduxr"
+                ],
+                "filter": {
+                    "name": "todo",
+                    "kind": "example"
                 }
             },
             "args": [],

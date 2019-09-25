@@ -1,7 +1,7 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+mod middleware;
+mod reduce;
+mod store;
+
+pub use middleware::*;
+pub use reduce::*;
+pub use store::*;
