@@ -5,6 +5,7 @@ jobs:
     docker:
       - image: circleci/rust:1.37
     steps:
+      - run: rustup component add clippy
       - checkout
       - run: cargo clippy --all-targets
 
