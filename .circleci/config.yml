@@ -1,0 +1,30 @@
+version: 2
+
+jobs:
+  clippy:
+    docker:
+      - image: circleci/rust:1.37
+    steps:
+      - run: rustup component add clippy
+      - checkout
+      - run: cargo clippy --all-targets
+
+  test:
+    docker:
+      - image: circleci/rust:1.37
+    steps:
+      - checkout
+      - run: cargo test --all-targets
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - clippy:
+          filters:
+            tags:
+              only: /.*/
+      - test:
+          filters:
+            tags:
+              only: /.*/
