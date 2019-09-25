@@ -6,8 +6,6 @@ pub trait Reduce<Action> {
 mod tests {
     use super::*;
 
-    struct no {}
-
     struct LampState {
         power: bool,
     }
