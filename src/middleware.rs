@@ -1,8 +1,10 @@
 use crate::*;
 
+/// Middleware is a function that takes a `MiddlewareContext` struct as an argument.
 pub type Middleware<State, Action, DispatchResult = ()> =
     Box<dyn Fn(MiddlewareContext<State, Action, DispatchResult>) -> DispatchResult>;
 
+/// The context in which middleware is executed.
 pub struct MiddlewareContext<'a, State, Action, DispatchResult = ()> {
     pub index: usize,
     pub action: &'a Action,

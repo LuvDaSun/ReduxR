@@ -1,6 +1,10 @@
 use crate::*;
 use std::cell::RefCell;
 
+/// A redux store. Dispatching actions on the store will make the action pass through the
+/// middleware and finally the state will be reduced via the `Reduce` trait.
+///
+/// All middleware may return a value that is eventually returned from the dispatch function.
 pub struct Store<State, Action, DispatchResult = ()> {
     state: RefCell<State>,
     initial_result_factory: fn() -> DispatchResult,
