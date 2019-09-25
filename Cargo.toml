@@ -1,6 +1,6 @@
 [package]
 name = "reduxr"
-version = "0.1.0"
+version = "0.1.1"
 description = "Redux store with full middleware support"
 license = "BSD-2-Clause"
 authors = ["Elmer Bulthuis <elmerbulthuis@gmail.com>"]
