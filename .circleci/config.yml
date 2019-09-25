@@ -1,20 +1,30 @@
-version: 2
+version: 2.1
+
+executors:
+  rust:
+    docker:
+      - image: circleci/rust:1.37
 
 jobs:
   clippy:
-    docker:
-      - image: circleci/rust:1.37
+    executor: rust
     steps:
       - run: rustup component add clippy
       - checkout
       - run: cargo clippy --all-targets
 
   test:
-    docker:
-      - image: circleci/rust:1.37
+    executor: rust
     steps:
       - checkout
       - run: cargo test --all-targets
+
+  publish:
+    executor: rust
+    steps:
+      - checkout
+      - run: sed -i 's/^version\s*=.*$/version = "'$(echo $CIRCLE_TAG | sed -nre 's/^v(.*)$/\1/p')'"/' Cargo.toml
+      - run: cargo publish
 
 workflows:
   version: 2
@@ -28,3 +38,12 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - publish:
+          context: cargo-publish
+          requires: [clippy, test]
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              # v1.0.0
+              only: /^v\d+\.\d+\.\d+$/
