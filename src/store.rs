@@ -68,7 +68,7 @@ where
     State: Default + Clone + Reduce<Action>,
     DispatchResult: Default,
 {
-    /// Create a new, with a default state and a default dispatch result factory.
+    /// Create a new redux store, with a default state and a default result factory.
     fn default() -> Self {
         Store::new(State::default(), DispatchResult::default)
     }
