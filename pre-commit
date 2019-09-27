@@ -1,7 +1,5 @@
 #!/bin/sh
 
-cargo clippy
-
-cargo test
-cargo test --example todo
-cargo test --example async
+cargo clippy --all-targets
+cargo test --all-targets
+cargo test --doc

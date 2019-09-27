@@ -1,6 +1,10 @@
 use crate::*;
 use std::cell::RefCell;
 
+/// A redux store. Dispatching actions on the store will make the action pass through the
+/// middleware and finally the state will be reduced via the `Reduce` trait.
+///
+/// All middleware may return a value that is eventually returned from the dispatch function.
 pub struct Store<State, Action, DispatchResult = ()> {
     state: RefCell<State>,
     initial_result_factory: fn() -> DispatchResult,
@@ -11,6 +15,7 @@ impl<State, Action, DispatchResult> Store<State, Action, DispatchResult>
 where
     State: Clone + Reduce<Action>,
 {
+    /// Create a new Redux store
     pub fn new(state: State, initial_result_factory: fn() -> DispatchResult) -> Self {
         let middleware = Vec::default();
         Self {
@@ -20,6 +25,7 @@ where
         }
     }
 
+    /// Adds new middleware to the store
     pub fn add_middleware<Middleware>(mut self, middleware: Middleware) -> Self
     where
         Middleware:
@@ -29,11 +35,12 @@ where
         self
     }
 
+    /// Dispatch action through the middleware and eventualle reduce state with it!
     pub fn dispatch(&self, action: &Action) -> DispatchResult {
         self.dispatch_index(action, 0)
     }
 
-    pub fn dispatch_index(&self, action: &Action, index: usize) -> DispatchResult {
+    pub(crate) fn dispatch_index(&self, action: &Action, index: usize) -> DispatchResult {
         let middleware = self.middleware.get(index);
 
         match middleware {
@@ -50,6 +57,7 @@ where
         }
     }
 
+    /// Get a clone of the current state
     pub fn get_state(&self) -> State {
         self.state.borrow().clone()
     }
@@ -69,6 +77,7 @@ where
     State: Default + Clone + Reduce<Action>,
     DispatchResult: Default,
 {
+    /// Create a new redux store, with a default state and a default result factory.
     fn default() -> Self {
         Store::new(State::default(), DispatchResult::default)
     }
