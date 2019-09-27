@@ -4,23 +4,11 @@ extern crate reduxr;
 use super::*;
 use reduxr::*;
 use std::future::*;
-use std::pin::Pin;
-use std::task::Context;
-use std::task::Poll;
 
-#[derive(Default)]
-pub struct ReadyFuture;
+pub type AsyncExampleDisatchResult = Box<dyn Future<Output = ()> + Unpin>;
 
-impl Future for ReadyFuture {
-    type Output = ();
-
-    fn poll(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Self::Output> {
-        Poll::Ready(())
-    }
-}
-
-pub fn create_store() -> Store<AsyncExampleState, (), ReadyFuture> {
-    Store::default().add_middleware(|context| context.dispatch_next(context.action))
+pub fn create_store() -> Store<AsyncExampleState, (), AsyncExampleDisatchResult> {
+    Store::new_with_result(|| Box::new(futures::future::ready({})))
 }
 
 #[cfg(test)]
