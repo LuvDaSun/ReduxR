@@ -4,11 +4,25 @@ extern crate reduxr;
 use super::*;
 use reduxr::*;
 use std::future::*;
+use std::pin::Pin;
 
-pub type AsyncExampleDisatchResult = Box<dyn Future<Output = ()> + Unpin>;
+pub type AsyncExampleDispatchResult = Pin<Box<dyn Future<Output = ()> + 'static>>;
 
-pub fn create_store() -> Store<AsyncExampleState, (), AsyncExampleDisatchResult> {
-    Store::new_with_result(|| Box::new(futures::future::ready({})))
+pub fn create_store() -> Store<AsyncExampleState, (), AsyncExampleDispatchResult> {
+    let store: Store<AsyncExampleState, (), AsyncExampleDispatchResult> =
+        Store::new_with_result(|| Box::pin(futures::future::ready(())));
+
+    let store = store.add_middleware(|context| context.dispatch_next(context.action));
+
+    let store = store.add_middleware(|context| {
+        let future = async {
+            // context.dispatch_next(context.action).await;
+        };
+        let result: AsyncExampleDispatchResult = Box::pin(future);
+        result
+    });
+
+    store
 }
 
 #[cfg(test)]
