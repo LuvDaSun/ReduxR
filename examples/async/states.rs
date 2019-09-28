@@ -8,7 +8,7 @@ pub struct AsyncExampleState {
 }
 
 impl Reduce<()> for AsyncExampleState {
-    fn reduce(self, _action: &()) -> Self {
+    fn reduce(self, _action: ()) -> Self {
         Self {
             count: self.count + 1,
         }

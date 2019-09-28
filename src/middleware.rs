@@ -10,16 +10,17 @@ pub struct MiddlewareContext<'a, State, Action, DispatchResult = ()> {
     index: usize,
 
     /// The action being dispatched
-    pub action: &'a Action,
+    pub action: Action,
 }
 
 impl<'a, State, Action, DispatchResult> MiddlewareContext<'a, State, Action, DispatchResult>
 where
     State: Clone + Reduce<Action>,
+    Action: Clone,
 {
     pub(crate) fn new(
         store: &'a Store<State, Action, DispatchResult>,
-        action: &'a Action,
+        action: Action,
         index: usize,
     ) -> Self {
         Self {
@@ -35,12 +36,12 @@ where
     }
 
     /// Dispatch an action to the store
-    pub fn dispatch(&self, action: &Action) -> DispatchResult {
+    pub fn dispatch(&self, action: Action) -> DispatchResult {
         self.store.dispatch_index(action, 0)
     }
 
     /// Dispatch action to the next middleware
-    pub fn dispatch_next(&self, action: &Action) -> DispatchResult {
+    pub fn dispatch_next(&self, action: Action) -> DispatchResult {
         self.store.dispatch_index(action, self.index + 1)
     }
 }

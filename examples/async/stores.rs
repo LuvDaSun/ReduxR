@@ -16,7 +16,7 @@ pub fn create_store() -> Store<AsyncExampleState, (), AsyncExampleDispatchResult
 
     let store = store.add_middleware(|context| {
         let future = async {
-            // context.dispatch_next(context.action).await;
+            // context.dispatch_next(context.action.clone()).await;
         };
         let result: AsyncExampleDispatchResult = Box::pin(future);
         result
@@ -37,9 +37,9 @@ mod tests {
             let state = store.get_state();
             assert_eq!(state.select_count(), 0);
 
-            store.dispatch(&()).await;
-            store.dispatch(&()).await;
-            store.dispatch(&()).await;
+            store.dispatch(()).await;
+            store.dispatch(()).await;
+            store.dispatch(()).await;
 
             let state = store.get_state();
             assert_eq!(state.select_count(), 3);
