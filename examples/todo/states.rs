@@ -1,6 +1,7 @@
 extern crate reduxr;
 
 use super::*;
+use std::collections::hash_map::RandomState;
 
 use reduxr::*;
 use std::collections::HashMap;
@@ -27,8 +28,7 @@ impl Reduce<TodoExampleAction> for Rc<TodoExampleState> {
     }
 }
 
-#[allow(clippy::implicit_hasher)]
-impl Reduce<TodoExampleAction> for Rc<HashMap<String, Rc<TodoItem>>> {
+impl Reduce<TodoExampleAction> for Rc<HashMap<String, Rc<TodoItem>, RandomState>> {
     fn reduce(mut self, action: &TodoExampleAction) -> Self {
         match action {
             TodoExampleAction::TodoAdd(add_item) => {
