@@ -36,7 +36,7 @@ impl Reduce<TodoExampleAction> for Rc<HashMap<String, Rc<TodoItem>, RandomState>
                 self_mut.insert(
                     add_item.id.clone(),
                     Rc::new(TodoItem {
-                        name: add_item.name.clone(),
+                        name: add_item.name,
                         done: false,
                     }),
                 );

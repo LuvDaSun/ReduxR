@@ -18,20 +18,20 @@ mod tests {
 
         let state1 = store.get_state();
 
-        store.dispatch(&TodoExampleAction::TodoAdd(TodoAddPayload {
+        store.dispatch(TodoExampleAction::TodoAdd(TodoAddPayload {
             id: String::from("a"),
             name: String::from("do a thing"),
         }));
 
         let state2 = store.get_state();
 
-        store.dispatch(&TodoExampleAction::TodoResolve(TodoResolvePayload {
+        store.dispatch(TodoExampleAction::TodoResolve(TodoResolvePayload {
             id: String::from("a"),
         }));
 
         let state3 = store.get_state();
 
-        store.dispatch(&TodoExampleAction::TodoRemove(TodoRemovePayload {
+        store.dispatch(TodoExampleAction::TodoRemove(TodoRemovePayload {
             id: String::from("a"),
         }));
 

@@ -1,88 +1,65 @@
 use crate::*;
 use std::cell::RefCell;
 
+type Dispatcher<State, Action> = Box<dyn Fn(&Store<State, Action>, Action)>;
+
 /// A redux store. Dispatching actions on the store will make the action pass through the
 /// middleware and finally the state will be reduced via the `Reduce` trait.
 ///
 /// All middleware may return a value that is eventually returned from the dispatch function.
-pub struct Store<State, Action, DispatchResult = ()> {
-    state: RefCell<State>,
-    initial_result_factory: fn() -> DispatchResult,
-    middleware: Vec<Middleware<State, Action, DispatchResult>>,
+pub struct Store<State, Action> {
+    state_cell: RefCell<State>,
+    dispatcher: Dispatcher<State, Action>,
 }
 
-impl<State, Action, DispatchResult> Store<State, Action, DispatchResult>
+impl<State, Action> Store<State, Action>
 where
     State: Clone + Reduce<Action>,
     Action: Clone,
 {
     /// Create a new Redux store
-    pub fn new(state: State, initial_result_factory: fn() -> DispatchResult) -> Self {
-        let middleware = Vec::default();
-        Self {
-            state: RefCell::new(state),
-            initial_result_factory,
-            middleware,
+    pub fn new(state: State) -> Self {
+        Store {
+            state_cell: RefCell::new(state),
+            dispatcher: Box::new(|store, action| {
+                let state = store.get_state();
+                let state = state.reduce(action);
+                store.state_cell.replace(state);
+            }),
         }
     }
 
-    /// Adds new middleware to the store
-    pub fn add_middleware<Middleware>(mut self, middleware: Middleware) -> Self
-    where
-        Middleware:
-            'static + Fn(MiddlewareContext<State, Action, DispatchResult>) -> DispatchResult,
-    {
-        self.middleware.push(Box::new(middleware));
-        self
+    pub fn enhance(
+        self,
+        enhancer: impl FnOnce(Dispatcher<State, Action>) -> Dispatcher<State, Action>,
+    ) -> Self {
+        let state_cell = self.state_cell;
+        let dispatcher = enhancer(self.dispatcher);
+        Store {
+            state_cell,
+            dispatcher,
+        }
     }
 
     /// Dispatch action through the middleware and eventualle reduce state with it!
-    pub fn dispatch(&self, action: Action) -> DispatchResult {
-        self.dispatch_index(action, 0)
-    }
-
-    pub(crate) fn dispatch_index(&self, action: Action, index: usize) -> DispatchResult {
-        let middleware = self.middleware.get(index);
-
-        match middleware {
-            Option::None => {
-                let state = self.get_state();
-                let state = state.reduce(action);
-                self.state.replace(state);
-                (self.initial_result_factory)()
-            }
-            Option::Some(middleware) => {
-                let context = MiddlewareContext::new(self, action, index);
-                middleware(context)
-            }
-        }
+    pub fn dispatch(&self, action: Action) {
+        (self.dispatcher)(self, action);
     }
 
     /// Get a clone of the current state
     pub fn get_state(&self) -> State {
-        self.state.borrow().clone()
+        self.state_cell.borrow().clone()
     }
 }
 
-impl<State, Action, DispatchResult> Store<State, Action, DispatchResult>
+impl<State, Action> Default for Store<State, Action>
 where
     State: Default + Clone + Reduce<Action>,
     Action: Clone,
 {
-    pub fn new_with_result(initial_result_factory: fn() -> DispatchResult) -> Self {
-        Store::new(State::default(), initial_result_factory)
-    }
-}
-
-impl<State, Action, DispatchResult> Default for Store<State, Action, DispatchResult>
-where
-    State: Default + Clone + Reduce<Action>,
-    Action: Clone,
-    DispatchResult: Default,
-{
-    /// Create a new redux store, with a default state and a default result factory.
+    /// Create a new redux store, with a default state.
     fn default() -> Self {
-        Store::new(State::default(), DispatchResult::default)
+        Store::new(State::default())
     }
 }
 
@@ -90,7 +67,7 @@ where
 mod tests {
     use super::*;
 
-    #[derive(Clone)]
+    #[derive(Copy, Clone)]
     enum LampAction {
         TurnOn,
         TurnOff,
@@ -100,6 +77,12 @@ mod tests {
     #[derive(Default, Clone)]
     struct LampState {
         power: bool,
+    }
+
+    impl LampState {
+        pub fn select_power(&self) -> bool {
+            self.power
+        }
     }
 
     impl Reduce<LampAction> for LampState {
@@ -114,7 +97,7 @@ mod tests {
 
     #[test]
     fn store_test() {
-        let store: Store<LampState, LampAction> = Store::default();
+        let store: Store<LampState, _> = Store::default();
 
         let state = store.get_state();
         assert_eq!(state.power, false);
@@ -129,51 +112,38 @@ mod tests {
     }
 
     #[test]
-    fn store_middleware_test() {
-        let store: Store<LampState, LampAction> =
-            Store::default().add_middleware(|context: MiddlewareContext<LampState, LampAction>| {
-                context.dispatch_next(context.action.clone());
-
-                if let LampAction::Switch = context.action {
-                    let state = context.get_state();
-                    if state.power {
-                        context.dispatch(LampAction::TurnOff);
-                    } else {
-                        context.dispatch(LampAction::TurnOn);
-                    }
-                }
+    fn store_enhanced_test() {
+        let store: Store<LampState, _> =
+            Store::default().enhance(|next: Dispatcher<LampState, _>| {
+                Box::new(move |store, action| {
+                    if let LampAction::Switch = action {
+                        let state = store.get_state();
+                        if state.select_power() {
+                            store.dispatch(LampAction::TurnOff);
+                        } else {
+                            store.dispatch(LampAction::TurnOn);
+                        }
+                    };
+                    next(store, action);
+                })
             });
 
         let state = store.get_state();
         assert_eq!(state.power, false);
 
-        store.dispatch(LampAction::Switch);
-        let state = store.get_state();
-        assert_eq!(state.power, true);
-
-        store.dispatch(LampAction::Switch);
-        let state = store.get_state();
-        assert_eq!(state.power, false);
-    }
-
-    #[test]
-    fn store_result_test() {
-        let store: Store<LampState, LampAction, usize> = Store::default().add_middleware(
-            |context: MiddlewareContext<LampState, LampAction, usize>| {
-                let count = context.dispatch_next(context.action.clone());
-
-                count + 1
-            },
-        );
-
-        let state = store.get_state();
-        assert_eq!(state.power, false);
-
         store.dispatch(LampAction::TurnOn);
         let state = store.get_state();
         assert_eq!(state.power, true);
 
         store.dispatch(LampAction::TurnOff);
+        let state = store.get_state();
+        assert_eq!(state.power, false);
+
+        store.dispatch(LampAction::Switch);
+        let state = store.get_state();
+        assert_eq!(state.power, true);
+
+        store.dispatch(LampAction::Switch);
         let state = store.get_state();
         assert_eq!(state.power, false);
     }

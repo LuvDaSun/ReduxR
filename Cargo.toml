@@ -8,4 +8,5 @@ edition = "2018"
 repository = "https://github.com/elmerbulthuis/reduxr"
 
 [dev-dependencies]
-futures-preview = "=0.3.0-alpha.19"
+
+[dependencies]

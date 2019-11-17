@@ -35,22 +35,20 @@
 ///     }
 /// }
 ///
-/// fn main() {
-///     let state = LampState { power: false };
-///     assert_eq!(state.power, false);
+/// let state = LampState { power: false };
+/// assert_eq!(state.power, false);
 ///
-///     let state = state.reduce(LampOnOffAction::TurnOn);
-///     assert_eq!(state.power, true);
+/// let state = state.reduce(LampOnOffAction::TurnOn);
+/// assert_eq!(state.power, true);
 ///
-///     let state = state.reduce(LampOnOffAction::TurnOff);
-///     assert_eq!(state.power, false);
+/// let state = state.reduce(LampOnOffAction::TurnOff);
+/// assert_eq!(state.power, false);
 ///
-///     let state = state.reduce(LampSwitchAction::Switch);
-///     assert_eq!(state.power, true);
+/// let state = state.reduce(LampSwitchAction::Switch);
+/// assert_eq!(state.power, true);
 ///
-///     let state = state.reduce(LampSwitchAction::Switch);
-///     assert_eq!(state.power, false);
-/// }
+/// let state = state.reduce(LampSwitchAction::Switch);
+/// assert_eq!(state.power, false);
 /// ```
 pub trait Reduce<Action> {
     fn reduce(self, action: Action) -> Self;
