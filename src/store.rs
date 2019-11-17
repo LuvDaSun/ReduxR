@@ -14,6 +14,7 @@ pub struct Store<State, Action, DispatchResult = ()> {
 impl<State, Action, DispatchResult> Store<State, Action, DispatchResult>
 where
     State: Clone + Reduce<Action>,
+    Action: Clone,
 {
     /// Create a new Redux store
     pub fn new(state: State, initial_result_factory: fn() -> DispatchResult) -> Self {
@@ -36,11 +37,11 @@ where
     }
 
     /// Dispatch action through the middleware and eventualle reduce state with it!
-    pub fn dispatch(&self, action: &Action) -> DispatchResult {
+    pub fn dispatch(&self, action: Action) -> DispatchResult {
         self.dispatch_index(action, 0)
     }
 
-    pub(crate) fn dispatch_index(&self, action: &Action, index: usize) -> DispatchResult {
+    pub(crate) fn dispatch_index(&self, action: Action, index: usize) -> DispatchResult {
         let middleware = self.middleware.get(index);
 
         match middleware {
@@ -63,9 +64,20 @@ where
     }
 }
 
+impl<State, Action, DispatchResult> Store<State, Action, DispatchResult>
+where
+    State: Default + Clone + Reduce<Action>,
+    Action: Clone,
+{
+    pub fn new_with_result(initial_result_factory: fn() -> DispatchResult) -> Self {
+        Store::new(State::default(), initial_result_factory)
+    }
+}
+
 impl<State, Action, DispatchResult> Default for Store<State, Action, DispatchResult>
 where
     State: Default + Clone + Reduce<Action>,
+    Action: Clone,
     DispatchResult: Default,
 {
     /// Create a new redux store, with a default state and a default result factory.
@@ -78,6 +90,7 @@ where
 mod tests {
     use super::*;
 
+    #[derive(Clone)]
     enum LampAction {
         TurnOn,
         TurnOff,
@@ -90,7 +103,7 @@ mod tests {
     }
 
     impl Reduce<LampAction> for LampState {
-        fn reduce(self, action: &LampAction) -> Self {
+        fn reduce(self, action: LampAction) -> Self {
             match action {
                 LampAction::TurnOn => LampState { power: true },
                 LampAction::TurnOff => LampState { power: false },
@@ -106,11 +119,11 @@ mod tests {
         let state = store.get_state();
         assert_eq!(state.power, false);
 
-        store.dispatch(&LampAction::TurnOn);
+        store.dispatch(LampAction::TurnOn);
         let state = store.get_state();
         assert_eq!(state.power, true);
 
-        store.dispatch(&LampAction::TurnOff);
+        store.dispatch(LampAction::TurnOff);
         let state = store.get_state();
         assert_eq!(state.power, false);
     }
@@ -119,14 +132,14 @@ mod tests {
     fn store_middleware_test() {
         let store: Store<LampState, LampAction> =
             Store::default().add_middleware(|context: MiddlewareContext<LampState, LampAction>| {
-                context.dispatch_next(context.action);
+                context.dispatch_next(context.action.clone());
 
                 if let LampAction::Switch = context.action {
                     let state = context.get_state();
                     if state.power {
-                        context.dispatch(&LampAction::TurnOff);
+                        context.dispatch(LampAction::TurnOff);
                     } else {
-                        context.dispatch(&LampAction::TurnOn);
+                        context.dispatch(LampAction::TurnOn);
                     }
                 }
             });
@@ -134,11 +147,11 @@ mod tests {
         let state = store.get_state();
         assert_eq!(state.power, false);
 
-        store.dispatch(&LampAction::Switch);
+        store.dispatch(LampAction::Switch);
         let state = store.get_state();
         assert_eq!(state.power, true);
 
-        store.dispatch(&LampAction::Switch);
+        store.dispatch(LampAction::Switch);
         let state = store.get_state();
         assert_eq!(state.power, false);
     }
@@ -147,7 +160,7 @@ mod tests {
     fn store_result_test() {
         let store: Store<LampState, LampAction, usize> = Store::default().add_middleware(
             |context: MiddlewareContext<LampState, LampAction, usize>| {
-                let count = context.dispatch_next(context.action);
+                let count = context.dispatch_next(context.action.clone());
 
                 count + 1
             },
@@ -156,11 +169,11 @@ mod tests {
         let state = store.get_state();
         assert_eq!(state.power, false);
 
-        store.dispatch(&LampAction::TurnOn);
+        store.dispatch(LampAction::TurnOn);
         let state = store.get_state();
         assert_eq!(state.power, true);
 
-        store.dispatch(&LampAction::TurnOff);
+        store.dispatch(LampAction::TurnOff);
         let state = store.get_state();
         assert_eq!(state.power, false);
     }

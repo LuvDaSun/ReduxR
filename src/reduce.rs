@@ -15,7 +15,7 @@
 /// }
 ///
 /// impl Reduce<LampOnOffAction> for LampState {
-///     fn reduce(self, action: &LampOnOffAction) -> Self {
+///     fn reduce(self, action: LampOnOffAction) -> Self {
 ///         match action {
 ///             LampOnOffAction::TurnOn => LampState { power: true },
 ///             LampOnOffAction::TurnOff => LampState { power: false },
@@ -28,7 +28,7 @@
 /// }
 ///
 /// impl Reduce<LampSwitchAction> for LampState {
-///     fn reduce(self, action: &LampSwitchAction) -> Self {
+///     fn reduce(self, action: LampSwitchAction) -> Self {
 ///         match action {
 ///             LampSwitchAction::Switch => LampState { power: !self.power },
 ///         }
@@ -39,19 +39,19 @@
 ///     let state = LampState { power: false };
 ///     assert_eq!(state.power, false);
 ///
-///     let state = state.reduce(&LampOnOffAction::TurnOn);
+///     let state = state.reduce(LampOnOffAction::TurnOn);
 ///     assert_eq!(state.power, true);
 ///
-///     let state = state.reduce(&LampOnOffAction::TurnOff);
+///     let state = state.reduce(LampOnOffAction::TurnOff);
 ///     assert_eq!(state.power, false);
 ///
-///     let state = state.reduce(&LampSwitchAction::Switch);
+///     let state = state.reduce(LampSwitchAction::Switch);
 ///     assert_eq!(state.power, true);
 ///
-///     let state = state.reduce(&LampSwitchAction::Switch);
+///     let state = state.reduce(LampSwitchAction::Switch);
 ///     assert_eq!(state.power, false);
 /// }
 /// ```
 pub trait Reduce<Action> {
-    fn reduce(self, action: &Action) -> Self;
+    fn reduce(self, action: Action) -> Self;
 }

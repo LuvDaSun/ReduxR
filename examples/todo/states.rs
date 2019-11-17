@@ -19,7 +19,7 @@ pub struct TodoExampleState {
 }
 
 impl Reduce<TodoExampleAction> for Rc<TodoExampleState> {
-    fn reduce(mut self, action: &TodoExampleAction) -> Self {
+    fn reduce(mut self, action: TodoExampleAction) -> Self {
         let self_mut = Rc::make_mut(&mut self);
 
         self_mut.todos = self_mut.todos.clone().reduce(action);
@@ -29,7 +29,7 @@ impl Reduce<TodoExampleAction> for Rc<TodoExampleState> {
 }
 
 impl Reduce<TodoExampleAction> for Rc<HashMap<String, Rc<TodoItem>, RandomState>> {
-    fn reduce(mut self, action: &TodoExampleAction) -> Self {
+    fn reduce(mut self, action: TodoExampleAction) -> Self {
         match action {
             TodoExampleAction::TodoAdd(add_item) => {
                 let self_mut = Rc::make_mut(&mut self);
