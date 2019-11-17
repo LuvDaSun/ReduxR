@@ -15,7 +15,6 @@ pub struct Store<State, Action> {
 impl<State, Action> Store<State, Action>
 where
     State: Clone + Reduce<Action>,
-    Action: Clone,
 {
     /// Create a new Redux store
     pub fn new(state: State) -> Self {
@@ -29,12 +28,12 @@ where
         }
     }
 
-    pub fn enhance(
+    pub fn add_middleware(
         self,
-        enhancer: impl FnOnce(Dispatcher<State, Action>) -> Dispatcher<State, Action>,
+        middleware: impl FnOnce(Dispatcher<State, Action>) -> Dispatcher<State, Action>,
     ) -> Self {
         let state_cell = self.state_cell;
-        let dispatcher = enhancer(self.dispatcher);
+        let dispatcher = middleware(self.dispatcher);
         Store {
             state_cell,
             dispatcher,
@@ -55,7 +54,6 @@ where
 impl<State, Action> Default for Store<State, Action>
 where
     State: Default + Clone + Reduce<Action>,
-    Action: Clone,
 {
     /// Create a new redux store, with a default state.
     fn default() -> Self {
@@ -112,21 +110,21 @@ mod tests {
     }
 
     #[test]
-    fn store_enhanced_test() {
-        let store: Store<LampState, _> =
-            Store::default().enhance(|next: Dispatcher<LampState, _>| {
-                Box::new(move |store, action| {
-                    if let LampAction::Switch = action {
-                        let state = store.get_state();
-                        if state.select_power() {
-                            store.dispatch(LampAction::TurnOff);
-                        } else {
-                            store.dispatch(LampAction::TurnOn);
-                        }
-                    };
-                    next(store, action);
-                })
-            });
+    fn store_middleware_test() {
+        let store: Store<LampState, _> = Store::default();
+        let store = store.add_middleware(|next| {
+            Box::new(move |store, action| {
+                if let LampAction::Switch = action {
+                    let state = store.get_state();
+                    if state.select_power() {
+                        store.dispatch(LampAction::TurnOff);
+                    } else {
+                        store.dispatch(LampAction::TurnOn);
+                    }
+                };
+                next(store, action);
+            })
+        });
 
         let state = store.get_state();
         assert_eq!(state.power, false);
