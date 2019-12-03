@@ -31,11 +31,13 @@ mod tests {
 
         let state3 = store.get_state();
 
-        store.dispatch(TodoExampleAction::TodoRemove(TodoRemovePayload {
-            id: String::from("a"),
-        }));
+        std::thread::spawn(|| {
+            store.dispatch(TodoExampleAction::TodoRemove(TodoRemovePayload {
+                id: String::from("a"),
+            }))
+        });
 
-        let state4 = store.get_state();
+        let state4 = std::thread::spawn(|| store.get_state()).join().unwrap();
 
         assert_eq!(state1.select_todo_count(), 0);
 
