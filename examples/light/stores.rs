@@ -4,7 +4,20 @@ use super::*;
 use reduxr::*;
 
 pub fn create_store() -> Store<LampState, LampAction> {
-    Store::default()
+    let store: Store<LampState, _> = Store::default();
+    store.add_middleware(|next| {
+        Box::new(move |store, action| {
+            if let LampAction::Switch = action {
+                let state = store.get_state();
+                if state.select_power() {
+                    store.dispatch(LampAction::TurnOff);
+                } else {
+                    store.dispatch(LampAction::TurnOn);
+                }
+            };
+            next(store, action);
+        })
+    })
 }
 
 #[cfg(test)]
@@ -13,20 +26,7 @@ mod tests {
 
     #[test]
     fn test_store() {
-        let store: Store<LampState, _> = Store::default();
-        let store = store.add_middleware(|next| {
-            Box::new(move |store, action| {
-                if let LampAction::Switch = action {
-                    let state = store.get_state();
-                    if state.select_power() {
-                        store.dispatch(LampAction::TurnOff);
-                    } else {
-                        store.dispatch(LampAction::TurnOn);
-                    }
-                };
-                next(store, action);
-            })
-        });
+        let store = create_store();
 
         let state = store.get_state();
         assert_eq!(state.select_power(), false);
