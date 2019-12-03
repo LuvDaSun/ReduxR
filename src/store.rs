@@ -1,14 +1,14 @@
 use crate::*;
-use std::cell::RefCell;
+use std::sync::RwLock;
 
-type Dispatcher<State, Action> = Box<dyn Fn(&Store<State, Action>, Action)>;
+type Dispatcher<State, Action> = Box<dyn Send + Sync + Fn(&Store<State, Action>, Action)>;
 
 /// A redux store. Dispatching actions on the store will make the action pass through the
 /// middleware and finally the state will be reduced via the `Reduce` trait.
 ///
 /// All middleware may return a value that is eventually returned from the dispatch function.
 pub struct Store<State, Action> {
-    state_cell: RefCell<State>,
+    state_lock: RwLock<State>,
     dispatcher: Dispatcher<State, Action>,
 }
 
@@ -19,11 +19,10 @@ where
     /// Create a new Redux store
     pub fn new(state: State) -> Self {
         Store {
-            state_cell: RefCell::new(state),
+            state_lock: RwLock::new(state),
             dispatcher: Box::new(|store, action| {
-                let state = store.get_state();
-                let state = state.reduce(action);
-                store.state_cell.replace(state);
+                let mut state = store.state_lock.write().unwrap();
+                *state = state.clone().reduce(action);
             }),
         }
     }
@@ -32,10 +31,10 @@ where
         self,
         middleware: impl FnOnce(Dispatcher<State, Action>) -> Dispatcher<State, Action>,
     ) -> Self {
-        let state_cell = self.state_cell;
+        let state_lock = self.state_lock;
         let dispatcher = middleware(self.dispatcher);
         Store {
-            state_cell,
+            state_lock,
             dispatcher,
         }
     }
@@ -47,7 +46,7 @@ where
 
     /// Get a clone of the current state
     pub fn get_state(&self) -> State {
-        self.state_cell.borrow().clone()
+        self.state_lock.read().unwrap().clone()
     }
 }
 
