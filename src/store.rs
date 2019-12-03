@@ -28,15 +28,11 @@ where
     }
 
     pub fn add_middleware(
-        self,
+        mut self,
         middleware: impl FnOnce(Dispatcher<State, Action>) -> Dispatcher<State, Action>,
     ) -> Self {
-        let state_lock = self.state_lock;
-        let dispatcher = middleware(self.dispatcher);
-        Store {
-            state_lock,
-            dispatcher,
-        }
+        self.dispatcher = middleware(self.dispatcher);
+        self
     }
 
     /// Dispatch action through the middleware and eventualle reduce state with it!
