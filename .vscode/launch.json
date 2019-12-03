@@ -41,6 +41,25 @@
             },
             "args": [],
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'async'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=async",
+                    "--package=reduxr"
+                ],
+                "filter": {
+                    "name": "async",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
