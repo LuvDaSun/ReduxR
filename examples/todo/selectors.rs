@@ -11,7 +11,7 @@ pub struct SelectTodoItemArg {
     pub id: String,
 }
 
-impl TodoExampleState {
+impl State {
     pub fn select_todo_count(&self) -> usize {
         self.todos.len()
     }

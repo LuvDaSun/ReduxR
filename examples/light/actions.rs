@@ -1,5 +1,5 @@
 #[derive(Copy, Clone)]
-pub enum LampAction {
+pub enum Action {
     TurnOn,
     TurnOff,
     Switch,

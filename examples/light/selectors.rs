@@ -1,6 +1,6 @@
 use super::*;
 
-impl LampState {
+impl State {
     pub fn select_power(&self) -> bool {
         self.power
     }

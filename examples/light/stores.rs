@@ -3,16 +3,16 @@ extern crate reduxr;
 use super::*;
 use reduxr::*;
 
-pub fn create_store() -> Store<LampState, LampAction> {
-    let store: Store<LampState, _> = Store::default();
+pub fn create_store() -> Store<State, Action> {
+    let store: Store<State, _> = Store::default();
     store.add_middleware(|next| {
         Box::new(move |store, action| {
-            if let LampAction::Switch = action {
+            if let Action::Switch = action {
                 let state = store.get_state();
                 if state.select_power() {
-                    store.dispatch(LampAction::TurnOff);
+                    store.dispatch(Action::TurnOff);
                 } else {
-                    store.dispatch(LampAction::TurnOn);
+                    store.dispatch(Action::TurnOn);
                 }
             };
             next(store, action);
@@ -31,19 +31,19 @@ mod tests {
         let state = store.get_state();
         assert_eq!(state.select_power(), false);
 
-        store.dispatch(LampAction::TurnOn);
+        store.dispatch(Action::TurnOn);
         let state = store.get_state();
         assert_eq!(state.select_power(), true);
 
-        store.dispatch(LampAction::TurnOff);
+        store.dispatch(Action::TurnOff);
         let state = store.get_state();
         assert_eq!(state.select_power(), false);
 
-        store.dispatch(LampAction::Switch);
+        store.dispatch(Action::Switch);
         let state = store.get_state();
         assert_eq!(state.select_power(), true);
 
-        store.dispatch(LampAction::Switch);
+        store.dispatch(Action::Switch);
         let state = store.get_state();
         assert_eq!(state.select_power(), false);
     }

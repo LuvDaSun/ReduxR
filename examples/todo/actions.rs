@@ -15,7 +15,7 @@ pub struct TodoResolvePayload {
 }
 
 #[derive(Clone)]
-pub enum TodoExampleAction {
+pub enum Action {
     TodoAdd(TodoAddPayload),
     TodoRemove(TodoRemovePayload),
     TodoResolve(TodoResolvePayload),

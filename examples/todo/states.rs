@@ -14,12 +14,12 @@ pub struct TodoItem {
 }
 
 #[derive(Default, Clone)]
-pub struct TodoExampleState {
+pub struct State {
     pub todos: Arc<HashMap<String, Arc<TodoItem>>>,
 }
 
-impl Reduce<TodoExampleAction> for Arc<TodoExampleState> {
-    fn reduce(mut self, action: TodoExampleAction) -> Self {
+impl Reduce<Action> for Arc<State> {
+    fn reduce(mut self, action: Action) -> Self {
         let self_mut = Arc::make_mut(&mut self);
 
         self_mut.todos = self_mut.todos.clone().reduce(action);
@@ -28,10 +28,10 @@ impl Reduce<TodoExampleAction> for Arc<TodoExampleState> {
     }
 }
 
-impl Reduce<TodoExampleAction> for Arc<HashMap<String, Arc<TodoItem>, RandomState>> {
-    fn reduce(mut self, action: TodoExampleAction) -> Self {
+impl Reduce<Action> for Arc<HashMap<String, Arc<TodoItem>, RandomState>> {
+    fn reduce(mut self, action: Action) -> Self {
         match action {
-            TodoExampleAction::TodoAdd(add_item) => {
+            Action::TodoAdd(add_item) => {
                 let self_mut = Arc::make_mut(&mut self);
                 self_mut.insert(
                     add_item.id.clone(),
@@ -42,12 +42,12 @@ impl Reduce<TodoExampleAction> for Arc<HashMap<String, Arc<TodoItem>, RandomStat
                 );
             }
 
-            TodoExampleAction::TodoRemove(remove_item) => {
+            Action::TodoRemove(remove_item) => {
                 let self_mut = Arc::make_mut(&mut self);
                 self_mut.remove(&remove_item.id);
             }
 
-            TodoExampleAction::TodoResolve(resolve_item) => {
+            Action::TodoResolve(resolve_item) => {
                 let self_mut = Arc::make_mut(&mut self);
                 let mut_item = Arc::make_mut(self_mut.get_mut(&resolve_item.id).unwrap());
 

@@ -4,15 +4,15 @@ use super::*;
 use reduxr::*;
 
 #[derive(Default, Clone)]
-pub struct LampState {
+pub struct State {
     pub power: bool,
 }
 
-impl Reduce<LampAction> for LampState {
-    fn reduce(self, action: LampAction) -> Self {
+impl Reduce<Action> for State {
+    fn reduce(self, action: Action) -> Self {
         match action {
-            LampAction::TurnOn => LampState { power: true },
-            LampAction::TurnOff => LampState { power: false },
+            Action::TurnOn => State { power: true },
+            Action::TurnOff => State { power: false },
             _ => self,
         }
     }
