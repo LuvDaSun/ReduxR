@@ -2,27 +2,9 @@ extern crate reduxr;
 
 use super::*;
 use reduxr::Store;
-use std::sync::Mutex;
 
 pub fn create_store() -> Store<State, Action> {
-    let store: Store<State, _> = Store::default();
-    store.add_middleware(|next| {
-        let mutex = Mutex::new(());
-
-        Box::new(move |store, action| {
-            next(store, action);
-
-            if let Action::Switch = action {
-                let _lock = mutex.lock();
-                let state = store.get_state();
-                if state.select_power() {
-                    store.dispatch(Action::TurnOff);
-                } else {
-                    store.dispatch(Action::TurnOn);
-                }
-            }
-        })
-    })
+    Store::default().add_middleware(create_switch_middleware())
 }
 
 #[cfg(test)]

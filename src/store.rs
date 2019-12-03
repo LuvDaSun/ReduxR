@@ -1,7 +1,7 @@
 use crate::*;
 use std::sync::RwLock;
 
-type Dispatcher<State, Action> = Box<dyn Send + Sync + Fn(&Store<State, Action>, Action)>;
+pub type Dispatch<State, Action> = Box<dyn Send + Sync + Fn(&Store<State, Action>, Action)>;
 
 /// A redux store. Dispatching actions on the store will make the action pass through the
 /// middleware and finally the state will be reduced via the `Reduce` trait.
@@ -9,7 +9,7 @@ type Dispatcher<State, Action> = Box<dyn Send + Sync + Fn(&Store<State, Action>,
 /// All middleware may return a value that is eventually returned from the dispatch function.
 pub struct Store<State, Action> {
     state_lock: RwLock<State>,
-    dispatcher: Dispatcher<State, Action>,
+    dispatch_handler: Dispatch<State, Action>,
 }
 
 impl<State, Action> Store<State, Action>
@@ -20,7 +20,7 @@ where
     pub fn new(state: State) -> Self {
         Store {
             state_lock: RwLock::new(state),
-            dispatcher: Box::new(|store, action| {
+            dispatch_handler: Box::new(|store, action| {
                 let mut state = store.state_lock.write().unwrap();
                 *state = state.clone().reduce(action);
             }),
@@ -29,15 +29,15 @@ where
 
     pub fn add_middleware(
         mut self,
-        middleware: impl FnOnce(Dispatcher<State, Action>) -> Dispatcher<State, Action>,
+        middleware: impl FnOnce(Dispatch<State, Action>) -> Dispatch<State, Action>,
     ) -> Self {
-        self.dispatcher = middleware(self.dispatcher);
+        self.dispatch_handler = middleware(self.dispatch_handler);
         self
     }
 
     /// Dispatch action through the middleware and eventualle reduce state with it!
     pub fn dispatch(&self, action: Action) {
-        (self.dispatcher)(self, action);
+        (self.dispatch_handler)(self, action);
     }
 
     /// Get a clone of the current state
