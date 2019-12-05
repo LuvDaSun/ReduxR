@@ -13,7 +13,7 @@ pub fn create_switch_middleware() -> impl FnOnce(Dispatch<State, Action>) -> Dis
             next(store, action);
 
             if let Action::Switch = action {
-                let _lock = mutex.lock();
+                let _lock = mutex.lock().unwrap();
                 let state = store.get_state();
                 if state.select_power() {
                     store.dispatch(Action::TurnOff);
