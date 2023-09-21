@@ -1,11 +1,11 @@
 [package]
 name = "reduxr"
 version = "0.0.0"
-description = "Redux store with full middleware support"
+description = "Redux store with middleware support"
 license = "BSD-2-Clause"
 authors = ["Elmer Bulthuis <elmerbulthuis@gmail.com>"]
 edition = "2018"
-repository = "https://github.com/elmerbulthuis/reduxr"
+repository = "https://github.com/LuvDaSun/ReduxR"
 
 [dev-dependencies]
 
