@@ -1,3 +1,10 @@
-/target
-**/*.rs.bk
-Cargo.lock
+.*
+
+!.gitignore
+!.editorconfig
+
+/target/
+/coverage/
+
+!/.vscode/
+!/.github/
