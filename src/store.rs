@@ -35,7 +35,7 @@ where
         self
     }
 
-    /// Dispatch action through the middleware and eventualle reduce state with it!
+    /// Dispatch action through the middleware and eventually reduce state with it!
     pub fn dispatch(&self, action: Action) {
         (self.dispatch_handler)(self, action);
     }

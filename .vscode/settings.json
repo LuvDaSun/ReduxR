@@ -1,10 +1,9 @@
-// Place your settings in this file to overwrite default and user settings.
 {
-    "editor.formatOnSave": true,
-    "editor.rulers": [
-        100
-    ],
-    "rust.clippy_preference": "on",
-    "rust.all_targets": true,
-    "rust-client.channel": "nightly"
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.organizeImports": true
+  },
+  "editor.rulers": [100],
+  "rust-analyzer.check.command": "clippy"
 }

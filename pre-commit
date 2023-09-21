@@ -1,5 +1,0 @@
-#!/bin/sh
-
-cargo clippy --all-targets
-cargo test --all-targets
-cargo test --doc
