@@ -4,5 +4,8 @@
   "language": "en",
   "useGitignore": true,
   "enableGlobDot": true,
-  "words": []
+  "words": [
+    "reduxr",
+    "todos"
+  ]
 }
